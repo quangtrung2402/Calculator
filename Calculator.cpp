@@ -1,33 +1,31 @@
-#include <iostream>
 #include <string>
 #include "Calculator.hpp"
-#include "ArrayStack.hpp"
+#include "Utility.hpp"
 
 using namespace std;
 
-Calculator::Calculator(std::string &expression)
+Calculator::Calculator(std::string &expression) : expressionStr(new std::string(expression)),
+                                                  values(new Stack_Int()),
+                                                  operators(new Stack_Char())
 {
-    this->expressionStr = new std::string(expression);
+    DEBUG_MSG("Created an Calculator for expression: " << expression);
 }
 
 Calculator::~Calculator()
 {
     delete expressionStr;
     expressionStr = nullptr;
+
+    delete values;
+    values = nullptr;
+
+    delete operators;
+    operators = nullptr;
 }
 
-void Calculator::sendExpression(std::string &exp)
-{
-    if (this->expressionStr != nullptr)
-    {
-        delete expressionStr;
-    }
-    expressionStr = new std::string(exp);
-}
-
-//check if char is a digit.
 bool Calculator::isDigit(char &c)
 {
+    DEBUG_MSG("Calculator::isDigit(" << c << ")");
     switch (c)
     {
     case '0':
@@ -46,15 +44,26 @@ bool Calculator::isDigit(char &c)
     }
 }
 
-//check if char is an operator.
 bool Calculator::isOperator(char &c)
 {
+    DEBUG_MSG("Calculator::isOperator(" << c << ")");
     switch (c)
     {
     case '+':
     case '-':
     case '*':
     case '/':
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool Calculator::isParentheses(char &c)
+{
+    DEBUG_MSG("Calculator::isParentheses(" << c << ")");
+    switch (c)
+    {
     case '(':
     case ')':
         return true;
@@ -63,9 +72,9 @@ bool Calculator::isOperator(char &c)
     }
 }
 
-//determine the precedence of an operator
-int Calculator::getPrecedence(char &c)
+int64_t Calculator::getPrecedence(char &c)
 {
+    DEBUG_MSG("Calculator::getPrecedence(" << c << ")");
     switch (c)
     {
     case '+':
@@ -82,9 +91,9 @@ int Calculator::getPrecedence(char &c)
     }
 }
 
-//evaluate an arithmetic expression
-int Calculator::operate(int &val1, int &val2, char &op)
+int64_t Calculator::operate(int64_t &val1, int64_t &val2, char &op)
 {
+    DEBUG_MSG("Calculator::operate(" << val1 << op << val2 << ")");
     switch (op)
     {
     case '+':
@@ -96,92 +105,152 @@ int Calculator::operate(int &val1, int &val2, char &op)
     case '/':
         return val1 / val2;
     default:
-        throw std::runtime_error("Not an operator!");
+        DEBUG_MSG("Not an operator!");
+        throw std::runtime_error("Something went wrong! Not an operator!");
     }
 }
 
-//evaluate a string.
-int Calculator::evaluate()
+int64_t Calculator::operate()
 {
-    CustomStack<int> vals;
-    CustomStack<char> ops;
+    DEBUG_MSG("Calculator::operate()");
+    int64_t result = (nullptr == values || values->empty())
+                         ? 0
+                         : values->pop();
 
-    int val = 0;
+    while (nullptr != operators &&
+           !operators->empty() &&
+           operators->top() != '(')
+    {
+        DEBUG_MSG("\toperators->size() = " << operators->size()
+                                           << ", values->size() = " << (nullptr == values ?: values->size()));
+        char op = operators->pop();
+
+        int64_t prevVal = (nullptr == values || values->empty())
+                              ? 0
+                              : values->pop();
+
+        result = operate(prevVal, result, op);
+    }
+
+    return result;
+}
+
+int64_t Calculator::evaluate()
+{
+    ElapsedTime t;
+    DEBUG_MSG("Calculator::evaluate()");
+    int64_t result = 0;
     try
     {
-        for (int pos = 0; pos < expressionStr->length(); ++pos)
+        if (nullptr == expressionStr)
+        {
+            throw runtime_error("Something went wrong! Don't have expression!");
+        }
+
+        for (size_t pos = 0; pos < expressionStr->length(); ++pos)
         {
             char spot = expressionStr->at(pos);
-            if (isDigit(spot))
+            DEBUG_MSG("\tCharacter handling: " << spot);
+
+            if (isDigit(spot)) // If is a digit, gets all digits in the current number
             {
-                val = (val * 10) + (int)(spot - '0');
+                int num = spot - '0';
+                while (pos + 1 < expressionStr->length() &&
+                       isDigit(expressionStr->at(pos + 1)))
+                {
+                    num = num * 10 + (expressionStr->at(++pos) - '0');
+                }
+
+                if (nullptr != values)
+                {
+                    values->push(num);
+                }
             }
-            else if (isOperator(spot))
+            else if (' ' == spot) // If is an space, ignore
             {
-                if (spot == '(')
+            }
+            else if (isOperator(spot)) //If is an operator, calculates
+            {
+                if (operators != nullptr)
                 {
-                    cout << "open parens, val = " << val << endl;
-                    ops.push(spot);
-                    val = 0;
-                }
-                else if (vals.empty())
-                {
-                    cout << "empty stack, val = " << val << endl;
-                    vals.push(val);
-                    ops.push(spot);
-                    val = 0;
-                }
-                else if (spot == ')')
-                {
-                    cout << "close parens, val = " << val << endl;
-                    vals.push(val);
-                    while (ops.top() != '(')
+                    if (operators->empty()) //If is first operator, just save it
                     {
-                        spot = ops.pop();
-                        val = vals.pop();
-                        int prev = vals.pop();
-                        val = operate(prev, val, spot);
-                        vals.push(val);
-                    }
-                    ops.pop();
-                    vals.pop();
-                    cout << "finished close parens, val = " << val << endl;
-                }
-                else
-                {
-                    char prev = ops.top();
-                    if (getPrecedence(spot) > getPrecedence(prev))
-                    {
-                        cout << "high precedence, val = " << val << endl;
-                        vals.push(val);
-                        ops.push(spot);
-                        val = 0;
+                        operators->push(spot);
                     }
                     else
                     {
-                        cout << "low precedence, val = " << val << endl;
-                        int prevval = vals.pop();
-                        char prevop = ops.pop();
-                        prevval = operate(prevval, val, prevop);
-                        vals.push(prevval);
-                        ops.push(spot);
-                        val = 0;
+                        char prevOp = operators->top();
+                        if ('(' == prevOp) //If is first operator in the parentheses, just save it
+                        {
+                            DEBUG_MSG("\tStart operand in parentheses");
+                            operators->push(spot);
+                        }
+                        else //Else, considers to calculate
+                        {
+                            if (getPrecedence(spot) > getPrecedence(prevOp))
+                            {
+                                DEBUG_MSG("\tHandling the higher precedence");
+                                operators->push(spot);
+                            }
+                            else
+                            {
+                                DEBUG_MSG("\tHandling the lower precedence, calculate!");
+                                if (nullptr != values)
+                                {
+                                    values->push(operate());
+                                }
+                                operators->push(spot);
+                            }
+                        }
                     }
                 }
             }
+            else if (isParentheses(spot)) //If is an parentheses, considers to calculate
+            {
+                if ('(' == spot) //If is open parenthese, just save it
+                {
+                    DEBUG_MSG("\tOpen parentheses");
+                    if (operators != nullptr)
+                    {
+                        operators->push(spot);
+                    }
+                }
+                else //Else, it is close parenthese, calculates
+                {
+                    DEBUG_MSG("\tClose parentheses, operators.top() = " << char(nullptr == operators || operators->empty() ?: operators->top()));
+
+                    if (nullptr != values)
+                    {
+                        values->push(operate());
+                    }
+
+                    if (operators != nullptr &&
+                        !operators->empty() &&
+                        '(' == operators->top())
+                    {
+                        operators->pop();
+                    }
+
+                    DEBUG_MSG("\tFinished close parentheses, values.top() = " << (nullptr == values || values->empty() ?: values->top()));
+                }
+            }
+            else
+            {
+                DEBUG_MSG("Not a number or an operator!");
+                throw runtime_error("Something went wrong! Not a number or an operator!");
+            }
         }
 
-        while (!ops.empty())
+        if (operators != nullptr &&
+            !operators->empty())
         {
-            cout << "ops not empty, val = " << val << endl;
-            int prev = vals.pop();
-            char spot = ops.pop();
-            val = operate(prev, val, spot);
+            DEBUG_MSG("\toperators stack is not empty, finish calculates");
+            result = operate();
         }
     }
-    catch (exception e)
+    catch (const exception &e)
     {
-        cout << "Exception: " << e.what() << endl;
+        DEBUG_MSG("Exception: " << e.what());
     }
-    return val;
+    return result;
 }
