@@ -4,7 +4,13 @@
 
 using namespace std;
 
+// #define TEST_CALCULATOR
+
+#ifdef TEST_CALCULATOR
 int main()
+#else
+int disable_main()
+#endif
 {
     string expression = "3 + 4 + 5";
     cout << Calculator(expression).evaluate() << endl; // 12

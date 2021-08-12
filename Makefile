@@ -4,7 +4,7 @@ LDFLAGS =  -fsanitize=address
 
 SRC = $(shell find . -name "*.cpp")
 OBJ = $(SRC:.cc=.o)
-EXEC = test
+EXEC = Calculator
 
 all: $(EXEC)
 
