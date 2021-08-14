@@ -29,10 +29,17 @@ void Client::readyReadNewData()
     QThreadPool::globalInstance()->start(calculator);
 }
 
-void Client::response(int64_t result)
+void Client::response(Result result)
 {
-    qDebug() << "response: " << result;
+    qDebug() << "response:\n\tresult:" << result.calculatedResult <<
+                "\n\tmessage:" << result.message.c_str();
+
     QByteArray buffer;
-    buffer.append("\r\nTask result = " + std::to_string(result) + "\n");
+    if(ResultCode::OK == result.code){
+        buffer.append("\nTask result = " + std::to_string(result.calculatedResult) +
+                      "\nMessage: " + result.message + "\n");
+    } else {
+        buffer.append("\nSomething went wrong!\n" + result.message + "\n");
+    }
     this->write(buffer);
 }

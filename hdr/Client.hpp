@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QThreadPool>
 #include "Calculator.hpp"
+#include "Result.hpp"
 
 class Client : public QTcpSocket
 {
@@ -19,7 +20,7 @@ signals:
 public slots:
     void readyReadNewData();
 
-    void response(int64_t result);
+    void response(Result result);
 
 private:
     Calculator *calculator;

@@ -27,24 +27,8 @@ Calculator::~Calculator()
 
 bool Calculator::isDigit(char &c)
 {
-    //TO-DO: can use isdegit()
     DEBUG_MSG("Calculator::isDigit(" << c << ")");
-    switch (c)
-    {
-    case '0':
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-        return true;
-    default:
-        return false;
-    }
+    return std::isdigit(c);
 }
 
 bool Calculator::isOperator(char &c)
@@ -277,24 +261,24 @@ void Calculator::addExpression(const char* expression)
 void Calculator::run()
 {
     //TO-DO: test
-//    {
-//        static int result = 0;
-//        emit notifyResult(++result);
-//    }
+    //    {
+    //        static int result = 0;
+    //        emit notifyResult(++result);
+    //    }
     evaluate();
     isDone = true;
     DEBUG_MSG(values->size());
-int64_t result = values->pop();
+    int64_t result = values->pop();
 
-    emit notifyResult(result);
+    emit notifyResult(Result(ResultCode::OK,result));
 
-while(values->size() > 0){
-    DEBUG_MSG(values->pop());
-}
+    while(values->size() > 0){
+        DEBUG_MSG(values->pop());
+    }
 
     if (isDone &&
             1 == values->size())
     {
-        emit notifyResult(values->pop());
+        emit notifyResult(Result(ResultCode::OK, values->pop()));
     }
 }

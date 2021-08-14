@@ -23,6 +23,7 @@ HEADERS += \
     hdr/Calculator.hpp \
     hdr/Client.hpp \
     hdr/CustomStack.hpp \
+    hdr/Result.hpp \
     hdr/Server.hpp \
     hdr/Utility.hpp
 

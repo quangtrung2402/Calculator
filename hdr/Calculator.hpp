@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QRunnable>
 #include "CustomStack.hpp"
+#include "Result.hpp"
 
 typedef CustomStack<int64_t> Stack_Int;
 typedef CustomStack<char> Stack_Char;
@@ -19,7 +20,7 @@ public:
     void addExpression(const char* expression);
 
 signals:
-    void notifyResult(int64_t result);
+    void notifyResult(Result result);
 
 protected:
     void run();
