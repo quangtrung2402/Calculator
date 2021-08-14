@@ -5,9 +5,10 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc < 2)
+    if ((argc < 2) ||
+            (!std::atoi(argv[1])))
     {
-        std::cerr << "Usage: CalculatorServer <port>" << std::endl;;
+        std::cerr << "Usage: CalculatorServer <port>\nExample: CalculatorServer 1234" << std::endl;;
         return 1;
     }
     QCoreApplication a(argc, argv);

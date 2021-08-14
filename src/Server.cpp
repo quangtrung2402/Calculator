@@ -14,6 +14,7 @@ void Server::start(int port)
     else
     {
         qDebug() << "Server is not started!";
+        exit(EXIT_FAILURE);
     }
 }
 
