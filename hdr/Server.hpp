@@ -2,8 +2,6 @@
 #define SERVER_HPP
 
 #include <QTcpServer>
-#include <QTcpSocket>
-#include <QAbstractSocket>
 #include "Client.hpp"
 
 class Server : public QTcpServer

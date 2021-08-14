@@ -20,6 +20,9 @@ public slots:
     void readyReadNewData();
 
     void response(int64_t result);
+
+private:
+    Calculator *calculator;
 };
 
 #endif // CLIENT_HPP
