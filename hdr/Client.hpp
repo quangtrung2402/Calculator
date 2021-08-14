@@ -7,33 +7,19 @@
 #include <QThreadPool>
 #include "Calculator.hpp"
 
-class Client : public QObject
+class Client : public QTcpSocket
 {
     Q_OBJECT
 public:
-    explicit Client(QObject *parent = 0);
-    ~Client(){
-        qDebug() << "Client is disconnected!";
-    }
-    void setSocket(int descriptor);
+    explicit Client(int descriptor, QObject *parent = 0);
+    ~Client();
 
 signals:
 
 public slots:
-    void readyRead();
+    void readyReadNewData();
 
     void response(int64_t result);
-
-private:
-    QTcpSocket *socket;
-};
-
-class CustomSocket : public QTcpSocket{
-public:
-    CustomSocket(QObject *parent):QTcpSocket(parent){}
-    ~CustomSocket(){
-        qDebug() << "One socket has been destroy";
-    }
 };
 
 #endif // CLIENT_HPP

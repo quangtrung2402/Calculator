@@ -23,6 +23,5 @@ void Server::start(int port)
 
 void Server::incomingConnection(long long handle)
 {
-    Client *client = new Client(this);
-    client->setSocket(handle);
+    new Client(handle, this);
 }

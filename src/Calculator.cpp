@@ -10,6 +10,7 @@ Calculator::Calculator()
 
 Calculator::~Calculator()
 {
+    qDebug() << "Calculator is destroy!";
 }
 
 void Calculator::run()

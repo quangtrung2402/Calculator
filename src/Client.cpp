@@ -2,34 +2,29 @@
 #include "../hdr/Utility.hpp"
 #include <iostream>
 
-Client::Client(QObject *parent) :
-    QObject(parent)
+Client::Client(int descriptor, QObject *parent) :
+    QTcpSocket(parent)
 {
+    connect(this, &Client::disconnected, this, &Client::deleteLater);
+    connect(this, &Client::readyRead, this, &Client::readyReadNewData);
+    this->setSocketDescriptor(descriptor);
+    qDebug() << "A new client is created, descriptor: " << descriptor;
 }
 
-void Client::setSocket(int descriptor)
+Client::~Client()
 {
-    // Create a new socket for incomming data
-    socket = new CustomSocket(this);
-
-    connect(socket, &QTcpSocket::disconnected, this, &Client::deleteLater);
-    connect(socket, &QTcpSocket::readyRead, this, &Client::readyRead);
-
-    socket->setSocketDescriptor(descriptor);
-
-    qDebug() << "A new socket created" << descriptor;
+    qDebug() << "Client is disconnected!";
 }
 
-void Client::readyRead()
+void Client::readyReadNewData()
 {
-
-    DEBUG_MSG("New data:" << socket->readAll());
+    DEBUG_MSG("New data:" << this->readAll());
 
     Calculator *calculator = new Calculator();
     calculator->setAutoDelete(true);
     connect(calculator, &Calculator::notifyResult, this, &Client::response);
 
-    qDebug() << "Starting a new task using a thread from the QThreadPool, socket id: " << socket->socketDescriptor();
+    qDebug() << "Starting a new task using a thread from the QThreadPool, socket id: " << this->socketDescriptor();
     QThreadPool::globalInstance()->start(calculator);
 }
 
@@ -38,5 +33,5 @@ void Client::response(int64_t result)
     qDebug() << "response: " << result;
     QByteArray buffer;
     buffer.append("\r\nTask result = " + std::to_string(result));
-    socket->write(buffer);
+    this->write(buffer);
 }
