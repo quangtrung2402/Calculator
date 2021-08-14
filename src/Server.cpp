@@ -1,8 +1,11 @@
-#include "../hdr/Server.h"
+#include "../hdr/Server.hpp"
 
 Server::Server(QObject *parent) :
     QTcpServer(parent)
 {
+    int processorCores = QThread::idealThreadCount();
+    qDebug() << "Setup max thread count for the Thread Pool: " << processorCores;
+    QThreadPool::globalInstance()->setMaxThreadCount(processorCores);
 }
 
 void Server::start(int port)

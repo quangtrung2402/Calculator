@@ -1,7 +1,7 @@
 #include <QCoreApplication>
 #include<iostream>
 
-#include<hdr/Server.h>
+#include<hdr/Server.hpp>
 
 int main(int argc, char *argv[])
 {

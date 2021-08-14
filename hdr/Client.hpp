@@ -1,17 +1,20 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef CLIENT_HPP
+#define CLIENT_HPP
 
 #include <QObject>
 #include <QTcpSocket>
 #include <QDebug>
 #include <QThreadPool>
-#include "Task.h"
+#include "Calculator.hpp"
 
 class Client : public QObject
 {
     Q_OBJECT
 public:
     explicit Client(QObject *parent = 0);
+    ~Client(){
+        qDebug() << "Client is disconnected!";
+    }
     void setSocket(int descriptor);
 
 signals:
@@ -19,7 +22,7 @@ signals:
 public slots:
     void readyRead();
 
-    void result(int result);
+    void response(int64_t result);
 
 private:
     QTcpSocket *socket;
@@ -33,4 +36,4 @@ public:
     }
 };
 
-#endif // CLIENT_H
+#endif // CLIENT_HPP
