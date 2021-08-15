@@ -38,5 +38,6 @@ private:
     Stack_Int *values;
     Stack_Char *operators;
     bool isDone;
+    bool runningStatus;
 };
 #endif //CALCULATOR_HPP

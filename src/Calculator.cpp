@@ -8,7 +8,8 @@ Calculator::Calculator(QObject *parent) : QObject(parent),
     expressionStr(new std::string()),
     values(new Stack_Int()),
     operators(new Stack_Char()),
-    isDone(false)
+    isDone(false),
+    runningStatus(false)
 {
     resetCalculator();
 }
@@ -249,7 +250,6 @@ int64_t Calculator::evaluate()
         }
     }
 
-    values->push(result);
     return result;
 }
 
@@ -286,20 +286,26 @@ void Calculator::resetCalculator()
 
 void Calculator::run()
 {
+    if(runningStatus) return;
+    runningStatus = true;
+
     try {
         ElapsedTime t("Evaluate time");
-        evaluate();
+        int64_t result = evaluate();
 
         DEBUG_MSG(values->size());
 
         if (isDone &&
-                1 == values->size())
+                values != nullptr &&
+                values->empty())
         {
-            emit notifyResult(Result(ResultCode::OK, values->pop()));
+            emit notifyResult(Result(ResultCode::OK, result));
             resetCalculator();
         }
     }  catch (const exception &e) {
         emit notifyResult(Result(ResultCode::ERROR, e.what()));
         resetCalculator();
     }
+
+    runningStatus = false;
 }

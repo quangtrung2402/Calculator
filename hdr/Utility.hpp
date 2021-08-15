@@ -28,8 +28,8 @@ public:
     }
 
 private:
-    clock_t startTime;
     std::string msg;
+    clock_t startTime;
 };
 
 #endif //UTILITY_HPP
