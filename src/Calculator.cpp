@@ -132,7 +132,7 @@ int64_t Calculator::operate()
 
 int64_t Calculator::evaluate()
 {
-    ElapsedTime t;
+    ElapsedTime t("Evaluate time");
     DEBUG_MSG("Calculator::evaluate()");
     int64_t result = 0;
     try

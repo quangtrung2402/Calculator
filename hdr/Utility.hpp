@@ -18,17 +18,18 @@
 class ElapsedTime
 {
 public:
-    ElapsedTime()
+    ElapsedTime(std::string message): msg(message),
+        startTime(clock())
     {
-        startTime = clock();
     }
     ~ElapsedTime()
     {
-        qDebug() << "Elapsed time:" << clock() - startTime;
+        qDebug() << msg.c_str() << ":" << clock() - startTime;
     }
 
 private:
     clock_t startTime;
+    std::string msg;
 };
 
 #endif //UTILITY_HPP
