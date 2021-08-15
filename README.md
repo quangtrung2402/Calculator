@@ -7,6 +7,7 @@
 NOTE: This solution has been test on:
 
 - macOS BigSug 11.5 with Qt 5.15.2 (Clang 11.0 (Apple), 64 bit)
+- Ubuntu 20.04.2 LTS with Qt 5.15.2 (GCC 7.3.1 20180303 (Red Hat 7.3.1-5), 64 bit)
 
 ## Installing and running
 
