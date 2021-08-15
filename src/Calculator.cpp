@@ -27,13 +27,13 @@ Calculator::~Calculator()
     operators = nullptr;
 }
 
-bool Calculator::isDigit(char &c)
+bool Calculator::isDigit(const char &c)
 {
     DEBUG_MSG("Calculator::isDigit(" << c << ")");
     return std::isdigit(c);
 }
 
-bool Calculator::isOperator(char &c)
+bool Calculator::isOperator(const char &c)
 {
     DEBUG_MSG("Calculator::isOperator(" << c << ")");
     switch (c)
@@ -48,7 +48,7 @@ bool Calculator::isOperator(char &c)
     }
 }
 
-bool Calculator::isParentheses(char &c)
+bool Calculator::isParentheses(const char &c)
 {
     DEBUG_MSG("Calculator::isParentheses(" << c << ")");
     switch (c)
@@ -61,7 +61,20 @@ bool Calculator::isParentheses(char &c)
     }
 }
 
-int64_t Calculator::getPrecedence(char &c)
+int64_t Calculator::getCurrentNumber(size_t &pos, char &spot)
+{
+    DEBUG_MSG("Calculator::getCurrentNumber(" << pos << "," << spot<< ")");
+    int64_t num = spot - '0';
+    while (pos + 1 < expressionStr->length() &&
+           isDigit(expressionStr->at(pos + 1)))
+    {
+        num = num * 10 + (expressionStr->at(++pos) - '0');
+    }
+    return num;
+
+}
+
+int64_t Calculator::getPrecedence(const char &c)
 {
     DEBUG_MSG("Calculator::getPrecedence(" << c << ")");
     switch (c)
@@ -80,7 +93,7 @@ int64_t Calculator::getPrecedence(char &c)
     }
 }
 
-int64_t Calculator::operate(int64_t &val1, int64_t &val2, char &op)
+int64_t Calculator::operate(const int64_t &val1, const int64_t &val2, const char &op)
 {
     DEBUG_MSG("Calculator::operate(" << val1 << op << val2 << ")");
     switch (op)
@@ -150,11 +163,14 @@ int64_t Calculator::evaluate()
 
             if (isDigit(spot)) // If is a digit, gets all digits in the current number
             {
-                int num = spot - '0';
-                while (pos + 1 < expressionStr->length() &&
-                       isDigit(expressionStr->at(pos + 1)))
-                {
-                    num = num * 10 + (expressionStr->at(++pos) - '0');
+                int64_t num = getCurrentNumber(pos, spot);
+
+                if(operators != nullptr &&
+                        !operators->empty() &&
+                        '-' == operators->top()){
+                    operators->pop();
+                    operators->push('+');
+                    num = -num;
                 }
 
                 if (nullptr != values)
@@ -237,12 +253,18 @@ int64_t Calculator::evaluate()
             }
             else
             {
+//                if('a' == spot)
+//                {
+//                    isDone = true;
+//                    break;
+//                }
                 DEBUG_MSG("Not a number or an operator!");
                 throw runtime_error("Something went wrong! Not a number or an operator!");
             }
         }
 
-        if (operators != nullptr &&
+        if (isDone &&
+                operators != nullptr &&
                 !operators->empty())
         {
             DEBUG_MSG("\toperators stack is not empty, finish calculates");

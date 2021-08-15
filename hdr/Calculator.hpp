@@ -15,7 +15,6 @@ class Calculator : public QObject, public QRunnable
 public:
     Calculator(QObject *parent);
     ~Calculator();
-    int64_t evaluate();
     void addExpression(const char* expression);
 
 signals:
@@ -25,12 +24,14 @@ protected:
     void run();
 
 private:
+    int64_t evaluate();
     void resetCalculator();
-    bool isDigit(char &);
-    bool isOperator(char &);
-    bool isParentheses(char &);
-    int64_t getPrecedence(char &);
-    int64_t operate(int64_t &, int64_t &, char &);
+    bool isDigit(const char &);
+    bool isOperator(const char &);
+    bool isParentheses(const char &);
+    int64_t getCurrentNumber(size_t &pos, char &spot);
+    int64_t getPrecedence(const char &);
+    int64_t operate(const int64_t &, const int64_t &, const char &);
     int64_t operate();
 
 private:
