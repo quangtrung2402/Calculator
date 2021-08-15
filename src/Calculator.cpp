@@ -256,7 +256,8 @@ int64_t Calculator::evaluate()
 void Calculator::addExpression(const char *expression)
 {
     DEBUG_MSG("Calculator::addExpression()");
-    if (expressionStr != nullptr)
+    if (expressionStr != nullptr
+            && expression != nullptr)
     {
         DEBUG_MSG(expressionStr->size());
         expressionStr->append(expression);
