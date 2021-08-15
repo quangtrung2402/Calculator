@@ -36,10 +36,10 @@ void Client::response(Result result)
 
     QByteArray buffer;
     if(ResultCode::OK == result.code){
-        buffer.append("\nTask result = " + std::to_string(result.calculatedResult) +
+        buffer.append("Task result = " + std::to_string(result.calculatedResult) +
                       "\nMessage: " + result.message + "\n");
     } else {
-        buffer.append("\nSomething went wrong!\n" + result.message + "\n");
+        buffer.append(result.message + "\n");
     }
     this->write(buffer);
 }

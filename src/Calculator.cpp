@@ -132,10 +132,9 @@ int64_t Calculator::operate()
 
 int64_t Calculator::evaluate()
 {
-    ElapsedTime t("Evaluate time");
+
     DEBUG_MSG("Calculator::evaluate()");
     int64_t result = 0;
-    try
     {
         if (nullptr == expressionStr ||
                 expressionStr->empty())
@@ -164,6 +163,11 @@ int64_t Calculator::evaluate()
             }
             else if (std::isspace(spot)) // If is an space, ignore
             {
+                if('\n' == spot)
+                {
+                    isDone = true;
+                    break;
+                }
             }
             else if (isOperator(spot)) //If is an operator, calculates
             {
@@ -244,14 +248,8 @@ int64_t Calculator::evaluate()
             result = operate();
         }
     }
-    catch (const exception &e)
-    {
-        DEBUG_MSG("Exception: " << e.what());
-    }
 
-    DEBUG_MSG("Result = " + values->size());
     values->push(result);
-    expressionStr->clear();
     return result;
 }
 
@@ -283,32 +281,25 @@ void Calculator::resetCalculator()
         while (!operators->empty())
             operators->pop();
     }
+    isDone = false;
 }
 
 void Calculator::run()
 {
-    //TO-DO: test
-    //    {
-    //        static int result = 0;
-    //        emit notifyResult(++result);
-    //    }
-    evaluate();
-    isDone = true;
-    DEBUG_MSG(values->size());
-    int64_t result = values->pop();
+    try {
+        ElapsedTime t("Evaluate time");
+        evaluate();
 
-    emit notifyResult(Result(ResultCode::OK, result));
+        DEBUG_MSG(values->size());
 
-    while (values->size() > 0)
-    {
-        DEBUG_MSG(values->pop());
+        if (isDone &&
+                1 == values->size())
+        {
+            emit notifyResult(Result(ResultCode::OK, values->pop()));
+            resetCalculator();
+        }
+    }  catch (const exception &e) {
+        emit notifyResult(Result(ResultCode::ERROR, e.what()));
+        resetCalculator();
     }
-
-    if (isDone &&
-            1 == values->size())
-    {
-        emit notifyResult(Result(ResultCode::OK, values->pop()));
-    }
-
-    resetCalculator();
 }
