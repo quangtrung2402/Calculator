@@ -4,12 +4,13 @@
 
 using namespace std;
 
-Calculator::Calculator(QObject *parent):QObject(parent),
-    expressionStr(new std::string()),
-    values(new Stack_Int()),
-    operators(new Stack_Char()),
-    isDone(false)
+Calculator::Calculator(QObject *parent) : QObject(parent),
+                                          expressionStr(new std::string()),
+                                          values(new Stack_Int()),
+                                          operators(new Stack_Char()),
+                                          isDone(false)
 {
+    resetCalculator();
 }
 
 Calculator::~Calculator()
@@ -258,6 +259,25 @@ void Calculator::addExpression(const char* expression)
     }
 }
 
+void Calculator::resetCalculator()
+{
+    if (expressionStr != nullptr)
+    {
+        expressionStr->clear();
+    }
+    if (values != nullptr)
+    {
+        while (!values->empty())
+            values->pop();
+    }
+
+    if (operators != nullptr)
+    {
+        while (!operators->empty())
+            operators->pop();
+    }
+}
+
 void Calculator::run()
 {
     //TO-DO: test
@@ -281,4 +301,6 @@ void Calculator::run()
     {
         emit notifyResult(Result(ResultCode::OK, values->pop()));
     }
+
+    resetCalculator();
 }

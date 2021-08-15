@@ -16,7 +16,6 @@ public:
     Calculator(QObject *parent);
     ~Calculator();
     int64_t evaluate();
-
     void addExpression(const char* expression);
 
 signals:
@@ -26,6 +25,7 @@ protected:
     void run();
 
 private:
+    void resetCalculator();
     bool isDigit(char &);
     bool isOperator(char &);
     bool isParentheses(char &);

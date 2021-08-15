@@ -19,8 +19,8 @@ signals:
 
 public slots:
     void readyReadNewData();
-
     void response(Result result);
+
 
 private:
     Calculator *calculator;
