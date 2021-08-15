@@ -5,10 +5,10 @@
 using namespace std;
 
 Calculator::Calculator(QObject *parent) : QObject(parent),
-                                          expressionStr(new std::string()),
-                                          values(new Stack_Int()),
-                                          operators(new Stack_Char()),
-                                          isDone(false)
+    expressionStr(new std::string()),
+    values(new Stack_Int()),
+    operators(new Stack_Char()),
+    isDone(false)
 {
     resetCalculator();
 }
@@ -91,13 +91,14 @@ int64_t Calculator::operate(int64_t &val1, int64_t &val2, char &op)
     case '*':
         return val1 * val2;
     case '/':
-        if(0 == val2){
-            throw std::runtime_error("Something went wrong! Zero devided");
+        if (0 == val2)
+        {
+            throw std::runtime_error("Something went wrong in your expression! We get a divided by zero");
         }
         return val1 / val2;
     default:
         DEBUG_MSG("Not an operator!");
-        throw std::runtime_error("Something went wrong! Not an operator!");
+        throw std::runtime_error("Something went wrong! We got an request to calculate with not an operator!");
     }
 }
 
@@ -114,11 +115,14 @@ int64_t Calculator::operate()
     {
         DEBUG_MSG("\toperators->size() = " << operators->size()
                   << ", values->size() = " << (nullptr == values ?: values->size()));
-        char op = operators->pop();
 
-        int64_t prevVal = (nullptr == values || values->empty())
-                ? 0
-                : values->pop();
+        if (nullptr == values || values->empty())
+        {
+            throw std::runtime_error("Something went wrong! The number of operators and the number of operands do not match!");
+        }
+
+        char op = operators->pop();
+        int64_t prevVal = values->pop();
 
         result = operate(prevVal, result, op);
     }
@@ -133,7 +137,8 @@ int64_t Calculator::evaluate()
     int64_t result = 0;
     try
     {
-        if (nullptr == expressionStr)
+        if (nullptr == expressionStr ||
+                expressionStr->empty())
         {
             throw runtime_error("Something went wrong! Don't have expression!");
         }
@@ -250,9 +255,11 @@ int64_t Calculator::evaluate()
     return result;
 }
 
-void Calculator::addExpression(const char* expression)
+void Calculator::addExpression(const char *expression)
 {
-    if(expressionStr != nullptr){
+    DEBUG_MSG("Calculator::addExpression()");
+    if (expressionStr != nullptr)
+    {
         DEBUG_MSG(expressionStr->size());
         expressionStr->append(expression);
         DEBUG_MSG(expressionStr->size());
@@ -290,9 +297,10 @@ void Calculator::run()
     DEBUG_MSG(values->size());
     int64_t result = values->pop();
 
-    emit notifyResult(Result(ResultCode::OK,result));
+    emit notifyResult(Result(ResultCode::OK, result));
 
-    while(values->size() > 0){
+    while (values->size() > 0)
+    {
         DEBUG_MSG(values->pop());
     }
 
